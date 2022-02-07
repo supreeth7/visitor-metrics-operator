@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/go-logr/logr"
 	visitorsv1 "github.com/supreeth7/visitor-metrics-operator/api/v1"
@@ -93,6 +94,26 @@ func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	// Backend
+	result, err = r.checkDeployment(req, instance, r.backendDeployment(instance))
+	if result != nil {
+		return *result, err
+	}
+
+	result, err = r.checkService(req, instance, r.backendService(instance))
+	if result != nil {
+		return *result, err
+	}
+
+	err = r.updateBackendStatus(instance)
+	if err != nil {
+		// Requeue the request if the status could not be updated
+		return reconcile.Result{}, err
+	}
+
+	result, err = r.handleBackendChanges(instance)
+	if result != nil {
+		return *result, err
+	}
 
 	return ctrl.Result{}, nil
 }

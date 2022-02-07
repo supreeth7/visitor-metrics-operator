@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/apex/log"
 	visitorsv1 "github.com/supreeth7/visitor-metrics-operator/api/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -138,7 +140,7 @@ func (r *VistorsAppReconciler) isMysqlUp(v *visitorsv1.VistorsApp) bool {
 	}, deployment)
 
 	if err != nil {
-		//log.Error(err, "Deployment mysql not found")
+		log.Error(fmt.Sprintf("Deployment mysql not found: %s", err))
 		return false
 	}
 
