@@ -19,11 +19,13 @@ package controllers
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	visitorsv1 "github.com/supreeth7/visitor-metrics-operator/api/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -50,9 +52,123 @@ type VistorsAppReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	instance := &visitorsv1.VistorsApp{}
+	err := r.Get(ctx, req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	// MySQL
+	_, err = r.checkDeployment(req, instance, &appsv1.Deployment{})
 
 	return ctrl.Result{}, nil
+}
+
+func (r *VistorsAppReconciler) checkDeployment(req ctrl.Request, app *visitorsv1.VistorsApp, deployment *appsv1.Deployment) (*ctrl.Result, error) {
+	ctx := context.TODO()
+	log := logr.FromContext(ctx)
+	found := &appsv1.Deployment{}
+	err := r.Get(
+		ctx,
+		types.NamespacedName{
+			Name:      deployment.Name,
+			Namespace: app.Namespace,
+		},
+		found,
+	)
+
+	if err != nil && errors.IsNotFound(err) {
+		// Create a new deployment
+		log.Info("Creating new deployment", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
+		err = r.Create(ctx, deployment)
+
+		if err != nil {
+			log.Error(err, "Failed creating a new deployment", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
+		} else {
+			log.Info("Success")
+			return nil, nil
+		}
+	} else if err != nil {
+		log.Error(err, "Failed creating a new deployment")
+		return &ctrl.Result{}, err
+	}
+
+	return nil, nil
+}
+
+func (r *VistorsAppReconciler) checkService(req ctrl.Request, app *visitorsv1.VistorsApp, svc *corev1.Service) (*ctrl.Result, error) {
+	ctx := context.TODO()
+	log := logr.FromContext(ctx)
+	found := &corev1.Service{}
+	err := r.Get(
+		ctx,
+		types.NamespacedName{
+			Name:      svc.Name,
+			Namespace: app.Namespace,
+		},
+		found,
+	)
+
+	if err != nil && errors.IsNotFound(err) {
+		// Create new service
+		log.Info("Creating new service", "Service.Namespace", svc.Namespace, "Service.Name", svc.Name)
+		err = r.Create(ctx, svc)
+
+		if err != nil {
+			log.Info("Service creation failed")
+			return &ctrl.Result{}, nil
+		} else {
+			return nil, nil
+		}
+	} else if err != nil {
+		log.Info("Service creation failed. Failed to get service.")
+		return &ctrl.Result{}, nil
+	}
+	return nil, nil
+}
+
+func (r *VistorsAppReconciler) checkSecret(req ctrl.Request, app *visitorsv1.VistorsApp, secret *corev1.Secret) (*ctrl.Result, error) {
+	ctx := context.TODO()
+	log := logr.FromContext(ctx)
+	found := &corev1.Secret{}
+	err := r.Get(
+		ctx,
+		types.NamespacedName{
+			Name:      secret.Name,
+			Namespace: app.Namespace,
+		},
+		found,
+	)
+
+	if err != nil && errors.IsNotFound(err) {
+		// Create new service
+		log.Info("Creating new secret", "Secret.Namespace", secret.Namespace, "Secret.Name", secret.Name)
+		err = r.Create(ctx, secret)
+
+		if err != nil {
+			log.Info("Secret creation failed")
+			return &ctrl.Result{}, nil
+		} else {
+			return nil, nil
+		}
+	} else if err != nil {
+		log.Info("Secret creation failed. Failed to get secret.")
+		return &ctrl.Result{}, nil
+	}
+	return nil, nil
+
+}
+
+func labels(v *visitorsv1.VistorsApp, tier string) map[string]string {
+	return map[string]string{
+		"app":             "visitors",
+		"visitorssite_cr": v.Name,
+		"tier":            tier,
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.
