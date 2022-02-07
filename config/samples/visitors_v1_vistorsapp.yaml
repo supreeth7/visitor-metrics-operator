@@ -1,0 +1,6 @@
+apiVersion: visitors.example.com/v1
+kind: VistorsApp
+metadata:
+  name: vistorsapp-sample
+spec:
+  # TODO(user): Add fields here

@@ -1,0 +1,24 @@
+# permissions for end users to edit vistorsapps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vistorsapp-editor-role
+rules:
+- apiGroups:
+  - visitors.example.com
+  resources:
+  - vistorsapps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - visitors.example.com
+  resources:
+  - vistorsapps/status
+  verbs:
+  - get

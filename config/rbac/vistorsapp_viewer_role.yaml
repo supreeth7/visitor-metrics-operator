@@ -1,0 +1,20 @@
+# permissions for end users to view vistorsapps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vistorsapp-viewer-role
+rules:
+- apiGroups:
+  - visitors.example.com
+  resources:
+  - vistorsapps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - visitors.example.com
+  resources:
+  - vistorsapps/status
+  verbs:
+  - get
