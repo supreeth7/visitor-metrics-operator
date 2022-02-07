@@ -115,6 +115,28 @@ func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return *result, err
 	}
 
+	// Frontend
+	result, err = r.checkDeployment(req, instance, r.frontendDeployment(instance))
+	if result != nil {
+		return *result, err
+	}
+
+	result, err = r.checkService(req, instance, r.frontendService(instance))
+	if result != nil {
+		return *result, err
+	}
+
+	err = r.updateFrontendStatus(instance)
+	if err != nil {
+		// Requeue the request
+		return reconcile.Result{}, err
+	}
+
+	result, err = r.handleFrontendChanges(instance)
+	if result != nil {
+		return *result, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
