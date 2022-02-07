@@ -63,7 +63,10 @@ func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	// MySQL
-	_, err = r.checkDeployment(req, instance, &appsv1.Deployment{})
+	// result, err := r.checkSecret(req, instance)
+	// if result != nil {
+	// 	return *result, err
+	// }
 
 	return ctrl.Result{}, nil
 }
@@ -161,14 +164,6 @@ func (r *VistorsAppReconciler) checkSecret(req ctrl.Request, app *visitorsv1.Vis
 	}
 	return nil, nil
 
-}
-
-func labels(v *visitorsv1.VistorsApp, tier string) map[string]string {
-	return map[string]string{
-		"app":             "visitors",
-		"visitorssite_cr": v.Name,
-		"tier":            tier,
-	}
 }
 
 // SetupWithManager sets up the controller with the Manager.
