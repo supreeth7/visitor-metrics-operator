@@ -7,6 +7,18 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - visitors.example.com
   resources:
   - vistorsapps
@@ -31,22 +43,4 @@ rules:
   verbs:
   - get
   - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - secrets
-  verbs:
-  - create
-  - list
-  - get
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - create
-  - get
   - update
