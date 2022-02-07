@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -52,6 +54,8 @@ type VistorsAppReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := logr.FromContext(ctx)
+
 	instance := &visitorsv1.VistorsApp{}
 	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
@@ -63,10 +67,32 @@ func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	// MySQL
-	// result, err := r.checkSecret(req, instance)
-	// if result != nil {
-	// 	return *result, err
-	// }
+	result, err := r.checkSecret(req, instance, r.mysqlAuthSecret(instance))
+	if result != nil {
+		return *result, err
+	}
+
+	result, err = r.checkDeployment(req, instance, r.mysqlDeployment(instance))
+	if result != nil {
+		return *result, err
+	}
+
+	result, err = r.checkService(req, instance, r.mysqlService(instance))
+	if result != nil {
+		return *result, err
+	}
+
+	mysqlRunning := r.isMysqlUp(instance)
+
+	if !mysqlRunning {
+		// Requeue
+		delay := time.Second * time.Duration(3)
+
+		log.Info(fmt.Sprintf("MySQL hasn't started, waiting fo %s", delay))
+		return ctrl.Result{RequeueAfter: delay}, nil
+	}
+
+	// Backend
 
 	return ctrl.Result{}, nil
 }
