@@ -1,0 +1,9 @@
+domain: example.com
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: visitor-metrics-operator
+repo: github.com/supreeth7/visitor-metrics-operator
+version: "3"
