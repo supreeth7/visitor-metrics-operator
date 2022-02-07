@@ -20,27 +20,24 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // VistorsAppSpec defines the desired state of VistorsApp
 type VistorsAppSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	//+kubebuilder:validation:Minimum=1
+	// Size is the size of the backend replicas
+	Size int32 `json:"size"`
 
-	// Foo is an example field of VistorsApp. Edit vistorsapp_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Title is the title of the frontend app
+	Title string `json:"title"`
 }
 
 // VistorsAppStatus defines the observed state of VistorsApp
 type VistorsAppStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	BackendImage  string `json:"backendImage"`
+	FrontendImage string `json:"frontendImage"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-
 // VistorsApp is the Schema for the vistorsapps API
 type VistorsApp struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -51,7 +48,6 @@ type VistorsApp struct {
 }
 
 //+kubebuilder:object:root=true
-
 // VistorsAppList contains a list of VistorsApp
 type VistorsAppList struct {
 	metav1.TypeMeta `json:",inline"`
