@@ -166,6 +166,14 @@ func (r *VistorsAppReconciler) checkSecret(req ctrl.Request, app *visitorsv1.Vis
 
 }
 
+func labels(v *visitorsv1.VistorsApp, tier string) map[string]string {
+	return map[string]string{
+		"app":             "visitors",
+		"visitorssite_cr": v.Name,
+		"tier":            tier,
+	}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *VistorsAppReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).

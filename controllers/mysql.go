@@ -7,17 +7,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
-
-// VistorsAppReconciler reconciles a VistorsApp object
-type VistorsAppReconciler struct {
-	client.Client
-	Scheme *runtime.Scheme
-}
 
 func mysqlDeploymentName() string {
 	return "mysql"
@@ -29,14 +21,6 @@ func mysqlServiceName() string {
 
 func mysqlAuthName() string {
 	return "mysql-auth"
-}
-
-func labels(v *visitorsv1.VistorsApp, tier string) map[string]string {
-	return map[string]string{
-		"app":             "visitors",
-		"visitorssite_cr": v.Name,
-		"tier":            tier,
-	}
 }
 
 func (r *VistorsAppReconciler) mysqlAuthSecret(v *visitorsv1.VistorsApp) *corev1.Secret {
