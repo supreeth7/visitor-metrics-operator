@@ -25,6 +25,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	visitorsv1 "github.com/supreeth7/visitor-metrics-operator/api/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // VistorsAppReconciler reconciles a VistorsApp object
@@ -36,6 +38,7 @@ type VistorsAppReconciler struct {
 //+kubebuilder:rbac:groups=visitors.example.com,resources=vistorsapps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=visitors.example.com,resources=vistorsapps/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=visitors.example.com,resources=vistorsapps/finalizers,verbs=update
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -49,8 +52,6 @@ type VistorsAppReconciler struct {
 func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
-
 	return ctrl.Result{}, nil
 }
 
@@ -58,5 +59,7 @@ func (r *VistorsAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 func (r *VistorsAppReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&visitorsv1.VistorsApp{}).
+		Owns(&appsv1.Deployment{}).
+		Owns(&corev1.Service{}).
 		Complete(r)
 }
